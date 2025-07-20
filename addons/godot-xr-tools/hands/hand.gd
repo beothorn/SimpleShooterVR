@@ -3,6 +3,7 @@
 class_name XRToolsHand
 extends Node3D
 
+var ray: MeshInstance3D = null
 
 ## XR Tools Hand Script
 ##
@@ -132,6 +133,9 @@ func _ready() -> void:
 	_animation_player = _find_child(self, "AnimationPlayer")
 	_animation_tree = _find_child(self, "AnimationTree")
 
+	if has_node("Ray"):
+		ray = $Ray
+
 	# Apply all updates
 	_update_hand_blend_tree()
 	_update_hand_material_override()
@@ -139,39 +143,43 @@ func _ready() -> void:
 	_update_target()
 
 
-## This method checks for world-scale changes and scales itself causing the
-## hand mesh and skeleton to scale appropriately. It then reads the grip and
-## trigger action values to animate the hand.
+var was_pressed = false
+
 func _physics_process(_delta: float) -> void:
-	# Do not run physics if in the editor
 	if Engine.is_editor_hint():
 		return
 
-	# Scale the hand mesh with the world scale.
 	if XRServer.world_scale != _last_world_scale:
 		_last_world_scale = XRServer.world_scale
 		_transform = _initial_transform.scaled(Vector3.ONE * _last_world_scale)
 		emit_signal("hand_scale_changed", _last_world_scale)
 
-	# Animate the hand mesh with the controller inputs
 	if _controller:
 		var grip : float = _controller.get_float(grip_action)
 		var trigger : float = _controller.get_float(trigger_action)
 
-		# Allow overriding of grip and trigger
 		if _force_grip >= 0.0: grip = _force_grip
 		if _force_trigger >= 0.0: trigger = _force_trigger
 
 		$AnimationTree.set("parameters/Grip/blend_amount", grip)
 		$AnimationTree.set("parameters/Trigger/blend_amount", trigger)
-		if trigger > 0.8:
-			print("Trigger pressed")
-			$Ray.visible = true
-			_check_hand_aim()
-		elif $Ray:
-			$Ray.visible = false
 
-	# Move to target
+		# Only fire once per press
+		if trigger > 0.8:
+			if not was_pressed:
+				print("Trigger pressed")
+				was_pressed = true
+				if ray:
+					$Ray.visible = true
+				_check_hand_aim()
+		else:
+			if was_pressed:
+				# Just released
+				print("Trigger released")
+			was_pressed = false
+			if ray:
+				$Ray.visible = false
+
 	global_transform = _target.global_transform * _transform
 	force_update_transform()
 
@@ -190,11 +198,8 @@ func _check_hand_aim():
 	var result = space_state.intersect_ray(ray_params)
 
 	if result and result.collider:
-		print("Aimed at:", result.collider.name)
 		if result.collider.has_method("on_shot"):
 			result.collider.on_shot(result.position)
-	else:
-		print("Aimed at nothing")
 
 
 # This method verifies the hand has a valid configuration.

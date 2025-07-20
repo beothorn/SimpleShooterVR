@@ -1,8 +1,19 @@
 [gd_scene load_steps=7 format=3 uid="uid://05vybhrklu2k"]
 
-[ext_resource type="Script" uid="uid://0kcycmrf2qvq" path="res://xr_origin.gd" id="1_gshht"]
 [ext_resource type="PackedScene" uid="uid://bq86r4yll8po" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_fullglove_low.tscn" id="1_jr1t4"]
 [ext_resource type="PackedScene" uid="uid://xqimcf20s2jp" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_fullglove_low.tscn" id="2_gshht"]
+
+[sub_resource type="GDScript" id="GDScript_jr1t4"]
+script/source = "extends XROrigin3D
+
+var push_offset := Vector3.ZERO
+
+func _process(delta):
+	# Smoothly decay the push over time
+	push_offset = push_offset.move_toward(Vector3.ZERO, delta * 2.0)
+	# Apply the push by modifying the origin's transform
+	global_position += push_offset
+"
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_gshht"]
 
@@ -11,7 +22,7 @@
 [sub_resource type="BoxMesh" id="BoxMesh_gshht"]
 
 [node name="XROrigin3D" type="XROrigin3D"]
-script = ExtResource("1_gshht")
+script = SubResource("GDScript_jr1t4")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="."]
 
