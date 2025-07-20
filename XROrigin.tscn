@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3 uid="uid://05vybhrklu2k"]
+
+[ext_resource type="Script" uid="uid://0kcycmrf2qvq" path="res://xr_origin.gd" id="1_gshht"]
+[ext_resource type="PackedScene" uid="uid://bq86r4yll8po" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_fullglove_low.tscn" id="1_jr1t4"]
+[ext_resource type="PackedScene" uid="uid://xqimcf20s2jp" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_fullglove_low.tscn" id="2_gshht"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_gshht"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_h0eir"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_gshht"]
+
+[node name="XROrigin3D" type="XROrigin3D"]
+script = ExtResource("1_gshht")
+
+[node name="XRCamera3D" type="XRCamera3D" parent="."]
+
+[node name="LeftHand" type="XRController3D" parent="."]
+tracker = &"left_hand"
+
+[node name="LeftHand" parent="LeftHand" instance=ExtResource("1_jr1t4")]
+
+[node name="RightHand" type="XRController3D" parent="."]
+tracker = &"right_hand"
+
+[node name="RightHand" parent="RightHand" instance=ExtResource("2_gshht")]
+
+[node name="Ray" type="MeshInstance3D" parent="RightHand/RightHand"]
+transform = Transform3D(-1.64203e-17, 2.84124e-07, 0.01, 0.01, -2.84124e-07, 3.55271e-17, 4.37114e-10, 6.5, -4.37114e-10, 0, 0, -6.474)
+mesh = SubResource("CylinderMesh_gshht")
+skeleton = NodePath("../..")
+
+[node name="Gun" type="Node3D" parent="RightHand"]
+
+[node name="Pipe" type="MeshInstance3D" parent="RightHand/Gun"]
+transform = Transform3D(-9.85217e-17, 3.93403e-09, 0.06, 0.06, -3.93403e-09, 2.13163e-16, 2.62268e-09, 0.09, -2.62268e-09, 0, 0, -0.109425)
+mesh = SubResource("CylinderMesh_h0eir")
+skeleton = NodePath("../..")
+
+[node name="TopPart" type="MeshInstance3D" parent="RightHand/Gun"]
+transform = Transform3D(0.04, 0, 0, 0, 0.035, 0, 0, 0, 0.11, 0, 0.02, 0.02)
+mesh = SubResource("BoxMesh_gshht")
+
+[node name="Trigger" type="MeshInstance3D" parent="RightHand/Gun"]
+transform = Transform3D(0.025, 0, 0, 0, -0.055, 0, 0, 0, 0.02, 0, -0.02, 0.05)
+mesh = SubResource("BoxMesh_gshht")
