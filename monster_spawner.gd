@@ -16,7 +16,8 @@ func spawn_monster():
 		monster.monster_dead.connect(_on_monster_dead)
 
 		var position = get_random_position_in_area()
-		monster.global_position = position
+		
+		monster.set_start_position(position)
 
 func _on_monster_dead(position: Vector3) -> void:
 	print("Monster died at:", position)
